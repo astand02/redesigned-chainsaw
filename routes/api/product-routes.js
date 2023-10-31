@@ -2,20 +2,38 @@ const router = require('express').Router();
 const { Product, Category, Tag, ProductTag } = require('../../models');
 
 // The `/api/products` endpoint
-
+// http://localhost:3001/api/product
 // get all products
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
+  try {
+    const productData = await Product.findAll();
+    res.status(200).json(productData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+
 });
 
 // get one product
+// http://localhost:3001/api/product/2
 router.get('/:id', async (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
-  try {
+  //try {
     const productData = await Product.findByPk(req.params.id, {
-      include: [{ model: Category, through: Tag, as: 'product_tag' }]
+      include: [
+        {
+          model: Tag,
+          attributes: ["id", "tag_name"],
+          through: "ProductTag",
+        },
+        {
+          model: Category,
+          attributes: ["id", "category_name"],
+        },
+      ],
     });
 
     if (!productData) {
@@ -24,15 +42,12 @@ router.get('/:id', async (req, res) => {
     }
 
     res.status(200).json(productData);
-  } catch (err) {
-    res.status(500).json(err);
-  }
 });
 
 // create new product
 router.post('/', (req, res) => {
 
-  Product.create(req.body, {
+  Product.create({
     product_name: req.body.product_name,
     price: req.body.price,
     stock: req.body.stock,
@@ -61,6 +76,7 @@ router.post('/', (req, res) => {
 });
 
 // update product
+// http://localhost:3001/api/product/4
 router.put('/:id', (req, res) => {
   // update product data
   Product.update(req.body, {
@@ -105,6 +121,7 @@ router.put('/:id', (req, res) => {
     });
 });
 
+// http://localhost:3001/api/product/4
 router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
   try {
