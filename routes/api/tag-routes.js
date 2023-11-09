@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
 
 // The `/api/tags` endpoint
-// http://localhost:3001/api/tag
+// http://localhost:3001/api/tags
 router.get('/', async (req, res) => {
   // find all tags
   // be sure to include its associated Product data
@@ -10,22 +10,24 @@ router.get('/', async (req, res) => {
     const tagData = await Tag.findAll({
       include: {
         model: Product,
-        attributes: ['product_name', 'price', 'stock', 'category_id']
+        attributes: ['id', 'product_name', 'price', 'stock', 'category_id'],
       }
     });
-
-    res.status(200).json(tagData);
+     res.status(200).json(tagData);
   } catch (err) {
     res.status(500).json(err);
   }
 });
-// http://localhost:3001/api/tag/2
+// http://localhost:3001/api/tags/2
 router.get('/:id', async (req, res) => {
   // find a single tag by its `id`
   // be sure to include its associated Product data
   try {
     const tagData = await Tag.findByPk(req.params.id, {
-      include: [{ model: Product, through: Tag, as: 'category_product' }]
+      include: [{ 
+        model: Product,  
+        attributes: ['id', 'product_name', 'price', 'stock', 'category_id'],
+      }]
     });
 
     if (!tagData) {
@@ -49,10 +51,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// http://localhost:3001/api/tag/3
+// http://localhost:3001/api/tags/3
 router.put('/:id', (req, res) => {
   // update a tag's name by its `id` value
-    Tag.update(req.body, 
+    Tag.update( 
       {
         tag_name: req.body.tag_name
       },
